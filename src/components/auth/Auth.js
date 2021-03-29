@@ -15,23 +15,12 @@ import { fbAuth, fbStore } from "../../firebase";
 import styled from "styled-components";
 import { connect } from "react-redux";
 import { logined } from "../../stores/loginState";
+import Copyright from "../Copyright";
 
 const ErrorMessege = styled.div`
    padding-left: 10px;
    color: red;
 `;
-function Copyright() {
-   return (
-      <Typography variant="body2" color="textSecondary" align="center">
-         {"Copyright © "}
-         <Link color="inherit" href="https://material-ui.com/">
-            Your Website
-         </Link>{" "}
-         {new Date().getFullYear()}
-         {"."}
-      </Typography>
-   );
-}
 const useStyles = makeStyles((theme) => ({
    paper: {
       margin: theme.spacing(8, 4),
