@@ -3,7 +3,6 @@ import Avatar from "@material-ui/core/Avatar";
 import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
-import Box from "@material-ui/core/Box";
 import Checkbox from "@material-ui/core/Checkbox";
 import Link from "@material-ui/core/Link";
 import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
@@ -15,7 +14,6 @@ import { fbAuth, fbStore } from "../../firebase";
 import styled from "styled-components";
 import { connect } from "react-redux";
 import { logined } from "../../stores/loginState";
-import Copyright from "../Copyright";
 
 const ErrorMessege = styled.div`
    padding-left: 10px;
@@ -162,9 +160,6 @@ function Auth({ onLogined }) {
                   </Link>
                </Grid>
             </Grid>
-            <Box mt={5}>
-               <Copyright />
-            </Box>
          </form>
       </div>
    );

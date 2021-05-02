@@ -12,6 +12,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import clsx from "clsx";
 import IconButton from "@material-ui/core/IconButton";
 import Drawer from "@material-ui/core/Drawer";
+import { useHistory } from "react-router";
 
 export const drawerWidth = 240;
 const useStyles = makeStyles((theme) => ({
@@ -44,31 +45,34 @@ const useStyles = makeStyles((theme) => ({
    },
 }));
 
-const mainListItems = (
-   <div>
-      <ListItem button>
-         <ListItemIcon>
-            <DashboardIcon />
-         </ListItemIcon>
-         <ListItemText primary="홈" />
-      </ListItem>
-      <ListItem button>
-         <ListItemIcon>
-            <ShoppingCartIcon />
-         </ListItemIcon>
-         <ListItemText primary="페이지 추가" />
-      </ListItem>
-      <ListItem button>
-         <ListItemIcon>
-            <PeopleIcon />
-         </ListItemIcon>
-         <ListItemText primary="고객문의" />
-      </ListItem>
-   </div>
-);
+const mainListItems = (history) => {
+   return (
+      <div>
+         <ListItem button onClick={() => history.push("/main")}>
+            <ListItemIcon>
+               <DashboardIcon />
+            </ListItemIcon>
+            <ListItemText primary="홈" />
+         </ListItem>
+         <ListItem button onClick={() => history.push("/main/addpage")}>
+            <ListItemIcon>
+               <ShoppingCartIcon />
+            </ListItemIcon>
+            <ListItemText primary="페이지 추가" />
+         </ListItem>
+         <ListItem button>
+            <ListItemIcon>
+               <PeopleIcon />
+            </ListItemIcon>
+            <ListItemText primary="고객문의" />
+         </ListItem>
+      </div>
+   );
+};
 
 export default function CustomDrawer({ open, handleDrawerClose }) {
    const classes = useStyles();
+   const history = useHistory();
    return (
       <>
          <Drawer
@@ -87,7 +91,7 @@ export default function CustomDrawer({ open, handleDrawerClose }) {
                </IconButton>
             </div>
             <Divider />
-            <List>{mainListItems}</List>
+            <List>{mainListItems(history)}</List>
          </Drawer>
       </>
    );

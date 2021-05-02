@@ -5,6 +5,8 @@ import CustomDrawer from "../components/dashbord/CustomDrawer";
 import { connect } from "react-redux";
 import MainBoard from "../components/dashbord/MainBoard";
 import CustomToolbar from "../components/dashbord/CustomToolbar";
+import { Route } from "react-router";
+import AddPage from "./AddPage";
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -12,7 +14,7 @@ const useStyles = makeStyles((theme) => ({
    },
 }));
 
-function Main({ isLogined, uid, onLogout, history }) {
+function Main({ isLogined, uid, history }) {
    const classes = useStyles();
    const [open, setOpen] = React.useState(true);
    const handleDrawerOpen = () => {
@@ -33,7 +35,10 @@ function Main({ isLogined, uid, onLogout, history }) {
          <CssBaseline />
          <CustomToolbar open={open} handleDrawerOpen={handleDrawerOpen} />
          <CustomDrawer open={open} handleDrawerClose={handleDrawerClose} />
-         <MainBoard />
+         <Route exact path="/main" component={MainBoard} />
+         <Route exact path="/main/addpage">
+            <AddPage uid={uid} />
+         </Route>
       </div>
    );
 }
