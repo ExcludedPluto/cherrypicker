@@ -102,7 +102,7 @@ function Auth({ onLogined }) {
             <LockOutlinedIcon />
          </Avatar>
          <Typography component="h1" variant="h5">
-            {signUp ? "Sign Up" : "Sign In"}
+            {signUp ? "회원가입" : "로그인"}
          </Typography>
          <form className={classes.form} noValidate>
             <TextField
@@ -134,7 +134,7 @@ function Auth({ onLogined }) {
             <ErrorMessege>{errMsg}</ErrorMessege>
             <FormControlLabel
                control={<Checkbox value="remember" color="primary" />}
-               label="Remember me"
+               label="자동로그인(미구현)"
             />
             <Button
                type="submit"
@@ -144,19 +144,17 @@ function Auth({ onLogined }) {
                className={classes.submit}
                onClick={onClick}
             >
-               {signUp ? "Sign Up" : "Sign In"}
+               {signUp ? "회원가입" : "로그인"}
             </Button>
             <Grid container>
                <Grid item xs>
                   <Link href="#" variant="body2">
-                     Forgot password?
+                     비밀번호찾기(미구현)
                   </Link>
                </Grid>
                <Grid item onClick={() => setSignUp((prev) => !prev)}>
                   <Link href="#" variant="body2">
-                     {signUp
-                        ? "Let's Sign In"
-                        : "Don't have an account? Sign Up"}
+                     {signUp ? "로그인" : "회원가입"}
                   </Link>
                </Grid>
             </Grid>

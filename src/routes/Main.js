@@ -3,10 +3,10 @@ import { makeStyles } from "@material-ui/core/styles";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import CustomDrawer from "../components/dashbord/CustomDrawer";
 import { connect } from "react-redux";
-import MainBoard from "../components/dashbord/MainBoard";
 import CustomToolbar from "../components/dashbord/CustomToolbar";
 import { Route } from "react-router";
 import AddPage from "./AddPage";
+import Home from "./Home";
 
 const useStyles = makeStyles((theme) => ({
    root: {
@@ -35,7 +35,9 @@ function Main({ isLogined, uid, history }) {
          <CssBaseline />
          <CustomToolbar open={open} handleDrawerOpen={handleDrawerOpen} />
          <CustomDrawer open={open} handleDrawerClose={handleDrawerClose} />
-         <Route exact path="/main" component={MainBoard} />
+         <Route exact path="/main">
+            <Home uid={uid} />
+         </Route>
          <Route exact path="/main/addpage">
             <AddPage uid={uid} />
          </Route>

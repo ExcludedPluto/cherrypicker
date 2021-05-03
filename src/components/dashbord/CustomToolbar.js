@@ -68,7 +68,7 @@ function CustomToolbar({ open, handleDrawerOpen, onLogout }) {
                   noWrap
                   className={classes.title}
                >
-                  Dashboard
+                  CherryPicker C204
                </Typography>
                <IconButton color="inherit" onClick={() => onLogout()}>
                   <ExitToAppIcon fontSize="large" />

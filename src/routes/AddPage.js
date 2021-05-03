@@ -84,19 +84,30 @@ function AddPage({ uid }) {
                .doc(`${info.name}`)
                .set({
                   url: info.url,
+                  createdAt: Date.now(),
                })
                .then(async () => {
                   await axios
                      .post(
-                        "http://localhost:5001/cherrypicker-6c0fa/us-central1/crawl/first",
+                        "https://us-central1-cherrypicker-6c0fa.cloudfunctions.net/crawl",
                         {
                            uid: uid,
                            name: info.name,
                            url: info.url,
                         }
                      )
-                     .then((res) => {
+                     .then(async (res) => {
                         console.log(res);
+                        const updateObj = {};
+                        updateObj[`${Date.now()}`] = {
+                           uid: uid,
+                           name: info.name,
+                           url: info.url,
+                        };
+                        await fbStore
+                           .collection("schedule")
+                           .doc(`${new Date().getHours()}`)
+                           .update(updateObj);
                         setLoading(false);
                      })
                      .catch((err) => {
