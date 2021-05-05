@@ -49,14 +49,9 @@ const useStyles = makeStyles((theme) => ({
    appBarSpacer: theme.mixins.toolbar,
 }));
 
-function ListItemLink(props) {
-   return <ListItem button component="a" {...props} />;
-}
-
 function Home({ uid }) {
    const classes = useStyles();
    const [loading, setLoading] = useState(false);
-   const [isPage, setIsPage] = useState(false);
    const [page, setPage] = useState(null);
    const [list, setList] = useState([]);
    const history = useHistory();
@@ -83,7 +78,6 @@ function Home({ uid }) {
 
    const onClick = async (item) => {
       setLoading(true);
-      console.log(item);
       await item
          .getDownloadURL()
          .then((data) => {
@@ -95,6 +89,7 @@ function Home({ uid }) {
             setLoading(false);
          });
    };
+
    return (
       <>
          <main className={classes.content}>

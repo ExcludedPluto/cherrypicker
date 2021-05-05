@@ -99,14 +99,23 @@ function AddPage({ uid }) {
                      .then(async (res) => {
                         console.log(res);
                         const updateObj = {};
-                        updateObj[`${Date.now()}`] = {
+                        const curTime = Date.now();
+                        updateObj[`${curTime}`] = {
                            uid: uid,
                            name: info.name,
                            url: info.url,
                         };
+                        const coeff = 1000 * 60 * 5;
+                        const rounded = new Date(
+                           Math.round(curTime / coeff) * coeff
+                        );
                         await fbStore
                            .collection("schedule")
-                           .doc(`${new Date().getHours()}`)
+                           .doc(
+                              `${
+                                 rounded.getHours() * 100 + rounded.getMinutes()
+                              }`
+                           )
                            .update(updateObj);
                         setLoading(false);
                      })
