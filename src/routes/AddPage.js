@@ -16,6 +16,7 @@ import React, { useState } from "react";
 import clsx from "clsx";
 import { fbStore } from "../firebase";
 import axios from "axios";
+import { v4 as uuidv4 } from "uuid";
 
 const useStyles = makeStyles((theme) => ({
    paper: {
@@ -79,51 +80,50 @@ function AddPage({ uid }) {
          ) {
             setWrong((prev) => ({ ...prev, url: false }));
             setLoading(true);
-            await fbStore
-               .collection(`${uid}`)
-               .doc(`${info.name}`)
-               .set({
-                  url: info.url,
-                  createdAt: Date.now(),
-               })
-               .then(async () => {
-                  await axios
-                     .post(
-                        "https://us-central1-cherrypicker-6c0fa.cloudfunctions.net/crawl",
-                        {
-                           uid: uid,
-                           name: info.name,
-                           url: info.url,
-                        }
-                     )
-                     .then(async (res) => {
-                        console.log(res);
-                        const updateObj = {};
-                        const curTime = Date.now();
-                        updateObj[`${curTime}`] = {
-                           uid: uid,
-                           name: info.name,
-                           url: info.url,
-                        };
-                        const coeff = 1000 * 60 * 5;
-                        const rounded = new Date(
-                           Math.round(curTime / coeff) * coeff
-                        );
-                        await fbStore
-                           .collection("schedule")
-                           .doc(
-                              `${
-                                 rounded.getHours() * 100 + rounded.getMinutes()
-                              }`
-                           )
-                           .update(updateObj);
-                        setLoading(false);
+            const uuid = uuidv4();
+            await axios
+               .post(
+                  "https://us-central1-cherrypicker-6c0fa.cloudfunctions.net/crawl",
+                  {
+                     uid: uid,
+                     uuid: uuid,
+                     name: info.name,
+                     url: info.url,
+                  }
+               )
+               .then(async (res) => {
+                  console.log(res);
+                  const updateObj = {};
+                  const curTime = Date.now();
+                  updateObj[`${uuid}`] = {
+                     uid: uid,
+                     createdAt: curTime,
+                     name: info.name,
+                     url: info.url,
+                     id: uuid,
+                  };
+                  const coeff = 1000 * 60 * 5;
+                  const rounded = new Date(Math.round(curTime / coeff) * coeff);
+                  await fbStore
+                     .collection("schedule")
+                     .doc(`${rounded.getHours() * 100 + rounded.getMinutes()}`)
+                     .update(updateObj);
+                  await fbStore
+                     .collection(`${uid}`)
+                     .doc(`${uuid}`)
+                     .set({
+                        url: info.url,
+                        name: info.name,
+                        createdAt: Date.now(),
                      })
-                     .catch((err) => {
-                        console.log(err);
-                        setLoading(false);
+                     .then(async () => {
+                        setInfo({ name: "", url: "" });
                      });
-                  setInfo({ name: "", url: "" });
+                  setLoading(false);
+               })
+               .catch((err) => {
+                  console.log(err);
+                  setLoading(false);
                });
          } else {
             setWrong((prev) => ({ ...prev, url: true }));

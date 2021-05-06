@@ -13,7 +13,7 @@ import {
    Typography,
 } from "@material-ui/core";
 import clsx from "clsx";
-import { fbStorage } from "../firebase";
+import { fbStorage, fbStore } from "../firebase";
 import { DeleteExtension } from "../utils/DeleteExtension";
 import { useHistory } from "react-router";
 
@@ -60,12 +60,17 @@ function Home({ uid }) {
    useEffect(() => {
       setLoading(true);
       const getList = async () => {
-         await fbStorage
-            .ref()
-            .child(`${uid}`)
-            .listAll()
+         await fbStore
+            .collection(`${uid}`)
+            .get()
             .then((data) => {
-               setList(data.items);
+               let list = [];
+               data.forEach((item) => {
+                  if (item.id !== "signUp") {
+                     list.push({ ...item.data(), id: item.id });
+                  }
+               });
+               setList(list);
                setLoading(false);
             })
             .catch((err) => {
@@ -75,10 +80,10 @@ function Home({ uid }) {
       };
       getList();
    }, [uid]);
-
    const onClick = async (item) => {
       setLoading(true);
-      await item
+      await fbStorage
+         .ref(`${uid}/${item.id}.png`)
          .getDownloadURL()
          .then((data) => {
             setPage(data);
@@ -148,11 +153,7 @@ function Home({ uid }) {
                                           button
                                           onClick={() => onClick(item)}
                                        >
-                                          <ListItemText
-                                             primary={DeleteExtension(
-                                                item.name
-                                             )}
-                                          />
+                                          <ListItemText primary={item.name} />
                                        </ListItem>
                                        <Divider />
                                     </>
