@@ -2,7 +2,7 @@
 
 ## Link
 
-(https://cherrypicker-6c0fa.web.app/)
+https://cherrypicker-6c0fa.web.app/
 
 ## Description
 
