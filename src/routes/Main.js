@@ -25,6 +25,18 @@ function Main({ isLogined, uid, history }) {
    };
 
    useEffect(() => {
+      function isMobile() {
+         return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+            navigator.userAgent
+         );
+      }
+      if (
+         /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+            navigator.userAgent
+         )
+      ) {
+         setOpen(false);
+      }
       if (!isLogined) {
          history.push("/");
       }
