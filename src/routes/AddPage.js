@@ -4,19 +4,17 @@ import {
    Container,
    FormControl,
    FormHelperText,
-   IconButton,
-   InputAdornment,
    InputLabel,
    makeStyles,
    Modal,
    OutlinedInput,
 } from "@material-ui/core";
-import { AddBox } from "@material-ui/icons";
 import React, { useState } from "react";
 import clsx from "clsx";
 import { fbStore } from "../firebase";
 import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
+import { Round5Minutes } from "../utils/Round5Minutes";
 
 const useStyles = makeStyles((theme) => ({
    paper: {
@@ -102,11 +100,9 @@ function AddPage({ uid }) {
                      url: info.url,
                      id: uuid,
                   };
-                  const coeff = 1000 * 60 * 5;
-                  const rounded = new Date(Math.round(curTime / coeff) * coeff);
                   await fbStore
                      .collection("schedule")
-                     .doc(`${rounded.getHours() * 100 + rounded.getMinutes()}`)
+                     .doc(`${Round5Minutes(curTime)}`)
                      .update(updateObj);
                   await fbStore
                      .collection(`${uid}`)
@@ -136,7 +132,9 @@ function AddPage({ uid }) {
       <>
          <main className={classes.content}>
             <div className={classes.appBarSpacer} />
+
             <Container maxWidth="lg" className={classes.container}>
+               <h1>페이지 추가</h1>
                <div className={classes.field}>
                   1. 이름을 적어주세요.
                   <br />
@@ -181,18 +179,6 @@ function AddPage({ uid }) {
                         value={info.url}
                         onChange={(e) =>
                            setInfo((prev) => ({ ...prev, url: e.target.value }))
-                        }
-                        endAdornment={
-                           <InputAdornment position="end">
-                              <IconButton
-                                 onClick={() =>
-                                    console.log("click icon button")
-                                 }
-                                 edge="end"
-                              >
-                                 <AddBox />
-                              </IconButton>
-                           </InputAdornment>
                         }
                         labelWidth={30}
                      />

@@ -4,8 +4,10 @@ import {
    Button,
    CircularProgress,
    Divider,
+   IconButton,
    List,
    ListItem,
+   ListItemSecondaryAction,
    ListItemText,
    makeStyles,
    Modal,
@@ -13,9 +15,10 @@ import {
    Typography,
 } from "@material-ui/core";
 import clsx from "clsx";
-import { fbStorage, fbStore } from "../firebase";
-import { DeleteExtension } from "../utils/DeleteExtension";
+import { fb, fbStorage, fbStore } from "../firebase";
 import { useHistory } from "react-router";
+import DeleteIcon from "@material-ui/icons/Delete";
+import { Round5Minutes } from "../utils/Round5Minutes";
 
 const useStyles = makeStyles((theme) => ({
    paper: {
@@ -54,6 +57,7 @@ function Home({ uid }) {
    const [loading, setLoading] = useState(false);
    const [page, setPage] = useState(null);
    const [list, setList] = useState([]);
+   const [refresh, setRefresh] = useState(1);
    const history = useHistory();
    const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
@@ -79,7 +83,7 @@ function Home({ uid }) {
             });
       };
       getList();
-   }, [uid]);
+   }, [uid, refresh]);
    const onClick = async (item) => {
       setLoading(true);
       await fbStorage
@@ -93,6 +97,19 @@ function Home({ uid }) {
             console.log(err);
             setLoading(false);
          });
+   };
+   const onDelete = async (item) => {
+      setLoading(true);
+      await fbStore.collection(`${uid}`).doc(`${item.id}`).delete();
+      const deleteObj = {};
+      deleteObj[`${item.id}`] = fb.firestore.FieldValue.delete();
+      await fbStore
+         .collection("schedule")
+         .doc(`${Round5Minutes(item.createdAt)}`)
+         .update(deleteObj);
+      await fbStorage.ref(`${uid}/${item.id}.png`).delete();
+      setRefresh((prev) => prev + 1);
+      setLoading(false);
    };
 
    return (
@@ -150,10 +167,20 @@ function Home({ uid }) {
                                     <>
                                        <ListItem
                                           id={idx}
+                                          key={idx}
                                           button
                                           onClick={() => onClick(item)}
                                        >
                                           <ListItemText primary={item.name} />
+                                          <ListItemSecondaryAction>
+                                             <IconButton
+                                                edge="end"
+                                                aria-label="delete"
+                                                onClick={() => onDelete(item)}
+                                             >
+                                                <DeleteIcon />
+                                             </IconButton>
+                                          </ListItemSecondaryAction>
                                        </ListItem>
                                        <Divider />
                                     </>
