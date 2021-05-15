@@ -1,20 +1,19 @@
 import {
    Button,
-   CircularProgress,
    Container,
    FormControl,
    FormHelperText,
+   IconButton,
    InputLabel,
    makeStyles,
-   Modal,
    OutlinedInput,
+   Snackbar,
 } from "@material-ui/core";
 import React, { useState } from "react";
+import CloseIcon from "@material-ui/icons/Close";
 import clsx from "clsx";
-import { fbStore } from "../firebase";
 import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
-import { Round5Minutes } from "../utils/Round5Minutes";
 
 const useStyles = makeStyles((theme) => ({
    paper: {
@@ -63,10 +62,10 @@ function AddPage({ uid }) {
       name: "",
       url: "",
    });
-   const [loading, setLoading] = useState(false);
    const [wrong, setWrong] = useState({
       url: false,
    });
+   const [openSnackbar, setSnack] = useState(false);
 
    const onSubmit = async () => {
       if (info.name && info.name.length >= 4) {
@@ -77,20 +76,20 @@ function AddPage({ uid }) {
             )
          ) {
             setWrong((prev) => ({ ...prev, url: false }));
-            setLoading(true);
             const uuid = uuidv4();
-            await axios
-               .post(
-                  "https://us-central1-cherrypicker-6c0fa.cloudfunctions.net/crawl",
-                  {
-                     uid: uid,
-                     uuid: uuid,
-                     name: info.name,
-                     url: info.url,
-                  }
-               )
+            setSnack(true);
+            setInfo({ name: "", url: "" });
+            await axios.post(
+               "https://us-central1-cherrypicker-6c0fa.cloudfunctions.net/crawl",
+               {
+                  uid: uid,
+                  uuid: uuid,
+                  name: info.name,
+                  url: info.url,
+               }
+            ); /*
                .then(async (res) => {
-                  console.log(res);
+                  //여기 설정은 백쪽으로 돌리기
                   const updateObj = {};
                   const curTime = Date.now();
                   updateObj[`${uuid}`] = {
@@ -104,23 +103,15 @@ function AddPage({ uid }) {
                      .collection("schedule")
                      .doc(`${Round5Minutes(curTime)}`)
                      .update(updateObj);
-                  await fbStore
-                     .collection(`${uid}`)
-                     .doc(`${uuid}`)
-                     .set({
-                        url: info.url,
-                        name: info.name,
-                        createdAt: Date.now(),
-                     })
-                     .then(async () => {
-                        setInfo({ name: "", url: "" });
-                     });
-                  setLoading(false);
+                  await fbStore.collection(`${uid}`).doc(`${uuid}`).set({
+                     url: info.url,
+                     name: info.name,
+                     createdAt: Date.now(),
+                  });
                })
                .catch((err) => {
                   console.log(err);
-                  setLoading(false);
-               });
+               });*/
          } else {
             setWrong((prev) => ({ ...prev, url: true }));
          }
@@ -203,12 +194,28 @@ function AddPage({ uid }) {
                   등록
                </Button>
             </Container>
-            <Modal open={loading}>
-               <CircularProgress
-                  color="secondary"
-                  className={classes.loading}
-               />
-            </Modal>
+            <Snackbar
+               anchorOrigin={{
+                  vertical: "bottom",
+                  horizontal: "left",
+               }}
+               open={openSnackbar}
+               autoHideDuration={10000}
+               onClose={() => setSnack(false)}
+               message="등록이 될 때까지 최대 30초 걸립니다."
+               action={
+                  <React.Fragment>
+                     <IconButton
+                        size="small"
+                        aria-label="close"
+                        color="inherit"
+                        onClick={() => setSnack(false)}
+                     >
+                        <CloseIcon fontSize="small" />
+                     </IconButton>
+                  </React.Fragment>
+               }
+            />
          </main>
       </>
    );

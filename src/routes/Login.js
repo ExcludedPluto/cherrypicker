@@ -1,22 +1,24 @@
-import React from "react";
+import React, { useEffect } from "react";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import Paper from "@material-ui/core/Paper";
 import Grid from "@material-ui/core/Grid";
 import { makeStyles } from "@material-ui/core/styles";
 import Auth from "../components/auth/Auth";
+import pic from "../mainImage.png";
+import { fbAuth } from "../firebase";
+import { useHistory } from "react-router";
+import { connect } from "react-redux";
+import { logined } from "../stores/loginState";
 
 const useStyles = makeStyles((theme) => ({
    root: {
       height: "100vh",
    },
    image: {
-      backgroundImage: "url(https://source.unsplash.com/random)",
+      backgroundImage: `url(${pic})`,
       backgroundRepeat: "no-repeat",
-      backgroundColor:
-         theme.palette.type === "light"
-            ? theme.palette.grey[50]
-            : theme.palette.grey[900],
-      backgroundSize: "cover",
+      backgroundColor: "white",
+      backgroundSize: "contain",
       backgroundPosition: "center",
    },
    paper: {
@@ -36,10 +38,26 @@ const useStyles = makeStyles((theme) => ({
    submit: {
       margin: theme.spacing(3, 0, 2),
    },
+   img: {
+      width: "100%",
+      height: "auto",
+   },
 }));
 
-export default function Login() {
+function Login({ onLogined, isLogined }) {
    const classes = useStyles();
+   const history = useHistory();
+
+   useEffect(() => {
+      if (!isLogined) {
+         fbAuth.onAuthStateChanged((user) => {
+            if (user) {
+               onLogined(user.uid);
+               return history.push("/main");
+            }
+         });
+      }
+   }, [history, onLogined, isLogined]);
 
    return (
       <Grid container component="main" className={classes.root}>
@@ -59,3 +77,16 @@ export default function Login() {
       </Grid>
    );
 }
+
+function mapDispatchToProps(dispatch) {
+   return {
+      onLogined: (uid) => dispatch(logined(uid)),
+   };
+}
+function mapStateToProps(state) {
+   return {
+      isLogined: state.loginReducer.isLogined,
+   };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Login);

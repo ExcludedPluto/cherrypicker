@@ -10,6 +10,7 @@ import { makeStyles } from "@material-ui/core";
 import { drawerWidth } from "./CustomDrawer";
 import { connect } from "react-redux";
 import { logout } from "../../stores/loginState";
+import { fbAuth } from "../../firebase";
 
 const useStyles = makeStyles((theme) => ({
    toolbar: {
@@ -42,6 +43,10 @@ const useStyles = makeStyles((theme) => ({
 }));
 function CustomToolbar({ open, handleDrawerOpen, onLogout }) {
    const classes = useStyles();
+   const logout = () => {
+      fbAuth.signOut();
+      onLogout();
+   };
    return (
       <>
          <AppBar
@@ -70,7 +75,7 @@ function CustomToolbar({ open, handleDrawerOpen, onLogout }) {
                >
                   CherryPicker C204
                </Typography>
-               <IconButton color="inherit" onClick={() => onLogout()}>
+               <IconButton color="inherit" onClick={logout}>
                   <ExitToAppIcon fontSize="large" />
                </IconButton>
             </Toolbar>

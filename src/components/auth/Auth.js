@@ -44,9 +44,10 @@ function Auth({ onLogined }) {
    const [email, setEmail] = useState("");
    const [pw, setPw] = useState("");
    const [errMsg, setErrMsg] = useState("");
+   const [rememberMe, setRememberMe] = useState(false);
    const classes = useStyles();
 
-   const onLogin = () => {
+   const login = () => {
       fbAuth
          .signInWithEmailAndPassword(email, pw)
          .then((user) => {
@@ -58,6 +59,21 @@ function Auth({ onLogined }) {
          .catch((error) => {
             setErrMsg(error.message);
          });
+   };
+
+   const onLogin = () => {
+      if (rememberMe) {
+         fbAuth
+            .setPersistence("local")
+            .then(() => {
+               return login();
+            })
+            .catch((error) => {
+               console.log(error);
+            });
+      } else {
+         login();
+      }
    };
    const onSignUp = () => {
       fbAuth
@@ -133,8 +149,14 @@ function Auth({ onLogined }) {
             />
             <ErrorMessege>{errMsg}</ErrorMessege>
             <FormControlLabel
-               control={<Checkbox value="remember" color="primary" />}
-               label="자동로그인(미구현)"
+               control={
+                  <Checkbox
+                     value={rememberMe}
+                     color="primary"
+                     onChange={() => setRememberMe((prev) => !prev)}
+                  />
+               }
+               label="자동로그인"
             />
             <Button
                type="submit"
