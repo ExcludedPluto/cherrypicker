@@ -45,8 +45,27 @@ function Auth({ onLogined }) {
    const [pw, setPw] = useState("");
    const [errMsg, setErrMsg] = useState("");
    const [rememberMe, setRememberMe] = useState(false);
+   const [findPassword, setFindPassword] = useState(false);
+   const [resetEmailSent, setResetEmailSent] = useState(false);
    const classes = useStyles();
 
+   const errorHandle = (err) => {
+      if (err.code === "auth/user-not-found") {
+         setErrMsg("가입되지 않은 이메일입니다.");
+      } else if (err.code === "auth/invalid-email") {
+         setErrMsg("이메일 형식을 지켜주세요.");
+      } else if (err.code === "auth/wrong-password") {
+         setErrMsg("잘못된 비밀번호 입니다.");
+      } else if (err.code === "auth/weak-password") {
+         setErrMsg("비밀번호는 최소 6자 이상이어야 합니다.");
+      } else if (err.code === "auth/email-already-in-use") {
+         setErrMsg("이미 사용중인 이메일입니다.");
+      } else if (err.code === "auth/user-disabled") {
+         setErrMsg("차단된 회원입니다.");
+      } else {
+         setErrMsg(err.message);
+      }
+   };
    const login = () => {
       fbAuth
          .signInWithEmailAndPassword(email, pw)
@@ -57,23 +76,23 @@ function Auth({ onLogined }) {
             history.push("/main");
          })
          .catch((error) => {
-            setErrMsg(error.message);
+            errorHandle(error);
          });
    };
 
-   const onLogin = () => {
+   const onLoginCheckIsRememberMe = () => {
       if (rememberMe) {
-         fbAuth
-            .setPersistence("local")
-            .then(() => {
-               return login();
-            })
-            .catch((error) => {
-               console.log(error);
-            });
+         fbAuth.setPersistence("local").then(() => {
+            return login();
+         });
       } else {
          login();
       }
+   };
+
+   const initValue = () => {
+      setErrMsg("");
+      setPw("");
    };
    const onSignUp = () => {
       fbAuth
@@ -86,23 +105,44 @@ function Auth({ onLogined }) {
                   signUpAt: new Date(),
                })
                .then((docRef) => {
-                  onLogin();
+                  login();
                })
                .catch((error) => {
-                  setErrMsg(error.message);
+                  errorHandle(error);
                });
          })
          .catch((error) => {
-            setErrMsg(error.message);
+            errorHandle(error);
          });
    };
 
+   const resetPassword = () => {
+      fbAuth
+         .sendPasswordResetEmail(email)
+         .then(() => {
+            initValue();
+            setResetEmailSent(true);
+         })
+         .catch((err) => {
+            errorHandle(err);
+         });
+   };
    const onClick = (e) => {
       e.preventDefault();
-      if (signUp) {
-         onSignUp();
+      if (resetEmailSent) {
+         setFindPassword(false);
+         setSignUp(false);
+         setResetEmailSent(false);
       } else {
-         onLogin();
+         if (findPassword) {
+            resetPassword();
+         } else {
+            if (signUp) {
+               onSignUp();
+            } else {
+               onLoginCheckIsRememberMe();
+            }
+         }
       }
    };
    const onChangeEmail = (e) => {
@@ -118,46 +158,61 @@ function Auth({ onLogined }) {
             <LockOutlinedIcon />
          </Avatar>
          <Typography component="h1" variant="h5">
-            {signUp ? "회원가입" : "로그인"}
+            {!findPassword ? (signUp ? "회원가입" : "로그인") : "비밀번호 찾기"}
          </Typography>
          <form className={classes.form} noValidate>
-            <TextField
-               variant="outlined"
-               margin="normal"
-               required
-               fullWidth
-               id="email"
-               label="Email Address"
-               name="email"
-               autoComplete="email"
-               value={email}
-               onChange={onChangeEmail}
-               autoFocus
-            />
-            <TextField
-               variant="outlined"
-               margin="normal"
-               required
-               fullWidth
-               name="password"
-               label="Password"
-               type="password"
-               id="password"
-               value={pw}
-               onChange={onChangePw}
-               autoComplete="current-password"
-            />
-            <ErrorMessege>{errMsg}</ErrorMessege>
-            <FormControlLabel
-               control={
-                  <Checkbox
-                     value={rememberMe}
-                     color="primary"
-                     onChange={() => setRememberMe((prev) => !prev)}
+            {" "}
+            {!resetEmailSent ? (
+               <>
+                  <TextField
+                     variant="outlined"
+                     margin="normal"
+                     required
+                     fullWidth
+                     id="email"
+                     label="Email Address"
+                     name="email"
+                     autoComplete="email"
+                     value={email}
+                     onChange={onChangeEmail}
+                     autoFocus
                   />
-               }
-               label="자동로그인"
-            />
+                  {!findPassword && (
+                     <TextField
+                        variant="outlined"
+                        margin="normal"
+                        required
+                        fullWidth
+                        name="password"
+                        label="Password"
+                        type="password"
+                        id="password"
+                        value={pw}
+                        onChange={onChangePw}
+                        autoComplete="current-password"
+                     />
+                  )}
+                  <ErrorMessege>{errMsg}</ErrorMessege>
+               </>
+            ) : (
+               <>
+                  {" "}
+                  비밀번호 재설정 이메일이 발송되었습니다. <br />
+                  재설정 후 다시 로그인해주세요.
+               </>
+            )}
+            {!findPassword && !signUp && (
+               <FormControlLabel
+                  control={
+                     <Checkbox
+                        value={rememberMe}
+                        color="primary"
+                        onChange={() => setRememberMe((prev) => !prev)}
+                     />
+                  }
+                  label="자동로그인"
+               />
+            )}
             <Button
                type="submit"
                fullWidth
@@ -166,20 +221,40 @@ function Auth({ onLogined }) {
                className={classes.submit}
                onClick={onClick}
             >
-               {signUp ? "회원가입" : "로그인"}
+               {!resetEmailSent
+                  ? !findPassword
+                     ? signUp
+                        ? "회원가입"
+                        : "로그인"
+                     : "비밀번호 재설정"
+                  : "로그인 하기"}
             </Button>
-            <Grid container>
-               <Grid item xs>
-                  <Link href="#" variant="body2">
-                     비밀번호찾기(미구현)
-                  </Link>
+            {!findPassword && (
+               <Grid container>
+                  <Grid item xs>
+                     <Link
+                        variant="body2"
+                        onClick={() => {
+                           setFindPassword(true);
+                           initValue();
+                        }}
+                     >
+                        비밀번호찾기
+                     </Link>
+                  </Grid>
+                  <Grid
+                     item
+                     onClick={() => {
+                        setSignUp((prev) => !prev);
+                        initValue();
+                     }}
+                  >
+                     <Link href="#" variant="body2">
+                        {signUp ? "로그인" : "회원가입"}
+                     </Link>
+                  </Grid>
                </Grid>
-               <Grid item onClick={() => setSignUp((prev) => !prev)}>
-                  <Link href="#" variant="body2">
-                     {signUp ? "로그인" : "회원가입"}
-                  </Link>
-               </Grid>
-            </Grid>
+            )}
          </form>
       </div>
    );
